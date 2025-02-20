@@ -148,12 +148,9 @@ public class SentryAutoConfiguration {
         final @NotNull ObjectProvider<GitProperties> gitProperties) {
       optionsConfigurations.forEach(
           optionsConfiguration -> optionsConfiguration.configure(options));
-      gitProperties.ifAvailable(
-          git -> {
-            if (options.getRelease() == null && options.isUseGitCommitIdAsRelease()) {
-              options.setRelease(git.getCommitId());
-            }
-          });
+      if (options.getRelease() == null && options.isUseGitCommitIdAsRelease()) {
+        gitProperties.map(GitProperties::getCommitId).ifAvailable(options::setRelease);
+      }
       spanFactory.ifAvailable(options::setSpanFactory);
 
       options.setSentryClientName(
